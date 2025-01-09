@@ -2,10 +2,10 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>쿼터파이</title>
+    <title>쿼터파이 라이브 스트림</title>
     <link rel="shortcut icon" type="image/x-icon" href="logo.ico">
-    <meta property="og:url" content="https://qpi-labels.github.io/main/">
-    <meta property="og:title" content="쿼터파이">
+    <meta property="og:url" content="https://qpi-labels.github.io/live/">
+    <meta property="og:title" content="쿼터파이 라이브">
     <meta property="og:type" content="website">
     <meta property="og:image" content="og.png">
     <meta property="og:description" content="만족도 1년연속 1위! 쿼터파이">
@@ -129,18 +129,96 @@
 
         document.addEventListener('selectstart', function(e) {
             e.preventDefault();
-        });
+        });    
+    </script>
+
+    <script>
+        async function getServerTime(url) {
+            try {
+                const response = await fetch(url, { method: 'HEAD' });
+                const serverDate = response.headers.get('Date');
+                return new Date(serverDate);
+            } catch (error) {
+                console.error('서버 시간을 가져오는 데 실패했습니다:', error);
+                return new Date(); // 실패 시 클라이언트 시간 반환
+            }
+        }
+
+        function addZero(val) {
+            return val < 10 ? '0' + val : val;
+        }
+
+        function createCountdownElement(id, label) {
+            const container = document.createElement('div');
+            container.className = 'countdown-container';
+
+            const title = document.createElement('h2');
+            title.innerText = label;
+
+            const countdown = document.createElement('div');
+            countdown.className = 'countdown';
+            countdown.id = id;
+            countdown.innerText = '로딩 중...';
+
+            container.appendChild(title);
+            container.appendChild(countdown);
+            document.getElementById('countdowns').appendChild(container);
+        }
+
+        async function startCountdowns() {
+            const serverTime = await getServerTime('https://www.naver.com/');
+            
+            const targets = [
+                { id: 'countdown1', label: 'Blue Origin 뉴 글렌 Maiden Flight', target: new Date(Date.UTC(2025, 0, 10, 6, 0, 0)) }, // UTC 2025-01-13 22:00
+                { id: 'countdown2', label: 'SpaceX 스타쉽 IFT-7', target: new Date(Date.UTC(2025, 0, 11, 13, 0, 0)) }, // UTC 2025-01-15 19:00
+                { id: 'countdown3', label: '개학', target: new Date(Date.UTC(2025, 2, 3, 0, 0, 0)) }  // UTC 2025-01-20 15:00
+            ];
+
+            targets.forEach(item => {
+                createCountdownElement(item.id, item.label);
+            });
+
+            function updateCountdowns() {
+                const now = new Date(serverTime.getTime() + (new Date() - serverTime));
+
+                targets.forEach(item => {
+                    const diff = item.target - now;
+
+                    if (diff <= 0) {
+                        document.getElementById(item.id).innerText = 'T - 00 : 00 : 00';
+                    } else {
+                        const hours = Math.floor(diff / (1000 * 60 * 60));
+                        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                        document.getElementById(item.id).innerText =
+                           'T - ' + addZero(hours) + ' : ' + addZero(minutes) + ' : ' + addZero(seconds) + '';
+                    }
+                });
+            }
+
+            updateCountdowns();
+            setInterval(updateCountdowns, 1000);
+        }
+
+        startCountdowns();
     </script>
 </head>
 <body>
     <p style="font-size: xx-large; margin-bottom: 0">쿼터파이 라이브</p>
     <div class="video-container">
-        <!-- YouTube Live Video Embed -->
         <iframe 
             src="https://www.youtube.com/embed/live_stream?channel=UCEVXzt1VEWfQFMewKOUL70Q" 
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
             allowfullscreen>
         </iframe>
     </div>
+    <br><br><br></br>
+    <p style="font-size: xx-large; margin-bottom: 0; font-weight: 800;">다음 이벤트</p>
+    <br>
+    <div id="countdowns"></div>
+    <br><br><br><br><br><br>
+    <a href="https://qpi-labels.github.io/qpi">쿼터파이</a>
+    <br><br><br>
 </body>
 </html>
